@@ -1,25 +1,28 @@
 package com.product.affiliation.views.productbuyaffiliation;
 
-import com.product.affiliation.data.SamplePerson;
+import com.product.affiliation.data.Monitor;
 import com.product.affiliation.services.SamplePersonService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
@@ -29,8 +32,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -39,7 +44,7 @@ import org.springframework.data.jpa.domain.Specification;
 @Uses(Icon.class)
 public class ProductBuyAffiliationView extends Div {
 
-    private Grid<SamplePerson> grid;
+    private Grid<Monitor> grid;
 
     private Filters filters;
     private final SamplePersonService samplePersonService;
@@ -81,40 +86,58 @@ public class ProductBuyAffiliationView extends Div {
         return mobileFilters;
     }
 
-    public static class Filters extends Div implements Specification<SamplePerson> {
-
-        private final TextField name = new TextField("Name");
-        private final TextField phone = new TextField("Phone");
-        private final DatePicker startDate = new DatePicker("Date of Birth");
-        private final DatePicker endDate = new DatePicker();
-        private final MultiSelectComboBox<String> occupations = new MultiSelectComboBox<>("Occupation");
-        private final CheckboxGroup<String> roles = new CheckboxGroup<>("Role");
+    public static class Filters extends Div {
+        private final Checkbox amazonChoiceYesOrNo = new Checkbox("Is Amazon choice?");
+        private final ComboBox<String> refreshRate = new ComboBox("Refresh Rate");
+        private final MultiSelectComboBox<String> brand = new MultiSelectComboBox<>("Brand");
+        private final MultiSelectComboBox<String> connectivityTech = new MultiSelectComboBox<>("Connectivity Tech");
+        private final CheckboxGroup<String> condition = new CheckboxGroup<>("Condition");
+        private final NumberField priceFromField = new NumberField("Price From");
+        private final NumberField priceToField = new NumberField("Price To");
+        private final MultiSelectComboBox<String> screenSize = new MultiSelectComboBox<>("Screen Size");
+        private final ComboBox<String> displayResolution = new ComboBox<>("Max display resolution");
+        private final ComboBox<String> displayType = new ComboBox<>("Display Type");
+        private final CheckboxGroup<String> color = new CheckboxGroup<>("Colour");
 
         public Filters(Runnable onSearch) {
-
             setWidthFull();
             addClassName("filter-layout");
             addClassNames(LumoUtility.Padding.Horizontal.LARGE, LumoUtility.Padding.Vertical.MEDIUM,
                     LumoUtility.BoxSizing.BORDER);
-            name.setPlaceholder("First or last name");
 
-            occupations.setItems("Insurance Clerk", "Mortarman", "Beer Coil Cleaner", "Scale Attendant");
-
-            roles.setItems("Worker", "Supervisor", "Manager", "External");
-            roles.addClassName("double-width");
+            refreshRate.setItems("60 Hz, 100 Hz"); //TODO: COme from database/backend
+            brand.setItems("Dell", "HP"); //TODO: COme from backend
+            brand.addClassName("double-width");
+            connectivityTech.setItems("VGA", "HDMI"); //TODO: COme from backend
+            connectivityTech.addClassName("double-width");
+            condition.setItems("New", "Used"); //TODO: COme from backend
+            condition.addClassName("double-width");
+            priceFromField.setPrefixComponent(new Div("£"));
+            priceToField.setPrefixComponent(new Div("£"));
+            screenSize.setItems("27 Inch, 32 Inch"); //TODO: COme from backend
+            displayResolution.setItems("1920 x 3242", "2560 x 1990"); //TODO: COme from backend
+            displayType.setItems("Ips"); //TODO: COme from backend
+            color.setItems("Black", "White");
 
             // Action buttons
             Button resetBtn = new Button("Reset");
             resetBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             resetBtn.addClickListener(e -> {
-                name.clear();
-                phone.clear();
-                startDate.clear();
-                endDate.clear();
-                occupations.clear();
-                roles.clear();
+                amazonChoiceYesOrNo.clear();
+                refreshRate.clear();
+                brand.clear();
+                connectivityTech.clear();
+                condition.clear();
+                priceFromField.clear();
+                priceToField.clear();
+                screenSize.clear();
+                displayResolution.clear();
+                displayType.clear();
+                color.clear();
+
                 onSearch.run();
             });
+
             Button searchBtn = new Button("Search");
             searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             searchBtn.addClickListener(e -> onSearch.run());
@@ -123,111 +146,32 @@ public class ProductBuyAffiliationView extends Div {
             actions.addClassName(LumoUtility.Gap.SMALL);
             actions.addClassName("actions");
 
-            add(name, phone, createDateRangeFilter(), occupations, roles, actions);
+            add(amazonChoiceYesOrNo, refreshRate, brand, connectivityTech, condition, priceFromField, priceToField, screenSize, displayResolution, displayType, color, actions);
         }
-
-        private Component createDateRangeFilter() {
-            startDate.setPlaceholder("From");
-
-            endDate.setPlaceholder("To");
-
-            // For screen readers
-            startDate.setAriaLabel("From date");
-            endDate.setAriaLabel("To date");
-
-            FlexLayout dateRangeComponent = new FlexLayout(startDate, new Text(" – "), endDate);
-            dateRangeComponent.setAlignItems(FlexComponent.Alignment.BASELINE);
-            dateRangeComponent.addClassName(LumoUtility.Gap.XSMALL);
-
-            return dateRangeComponent;
-        }
-
-        @Override
-        public Predicate toPredicate(Root<SamplePerson> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (!name.isEmpty()) {
-                String lowerCaseFilter = name.getValue().toLowerCase();
-                Predicate firstNameMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
-                        lowerCaseFilter + "%");
-                Predicate lastNameMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")),
-                        lowerCaseFilter + "%");
-                predicates.add(criteriaBuilder.or(firstNameMatch, lastNameMatch));
-            }
-            if (!phone.isEmpty()) {
-                String databaseColumn = "phone";
-                String ignore = "- ()";
-
-                String lowerCaseFilter = ignoreCharacters(ignore, phone.getValue().toLowerCase());
-                Predicate phoneMatch = criteriaBuilder.like(
-                        ignoreCharacters(ignore, criteriaBuilder, criteriaBuilder.lower(root.get(databaseColumn))),
-                        "%" + lowerCaseFilter + "%");
-                predicates.add(phoneMatch);
-
-            }
-            if (startDate.getValue() != null) {
-                String databaseColumn = "dateOfBirth";
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(databaseColumn),
-                        criteriaBuilder.literal(startDate.getValue())));
-            }
-            if (endDate.getValue() != null) {
-                String databaseColumn = "dateOfBirth";
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.literal(endDate.getValue()),
-                        root.get(databaseColumn)));
-            }
-            if (!occupations.isEmpty()) {
-                String databaseColumn = "occupation";
-                List<Predicate> occupationPredicates = new ArrayList<>();
-                for (String occupation : occupations.getValue()) {
-                    occupationPredicates
-                            .add(criteriaBuilder.equal(criteriaBuilder.literal(occupation), root.get(databaseColumn)));
-                }
-                predicates.add(criteriaBuilder.or(occupationPredicates.toArray(Predicate[]::new)));
-            }
-            if (!roles.isEmpty()) {
-                String databaseColumn = "role";
-                List<Predicate> rolePredicates = new ArrayList<>();
-                for (String role : roles.getValue()) {
-                    rolePredicates.add(criteriaBuilder.equal(criteriaBuilder.literal(role), root.get(databaseColumn)));
-                }
-                predicates.add(criteriaBuilder.or(rolePredicates.toArray(Predicate[]::new)));
-            }
-            return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
-        }
-
-        private String ignoreCharacters(String characters, String in) {
-            String result = in;
-            for (int i = 0; i < characters.length(); i++) {
-                result = result.replace("" + characters.charAt(i), "");
-            }
-            return result;
-        }
-
-        private Expression<String> ignoreCharacters(String characters, CriteriaBuilder criteriaBuilder,
-                Expression<String> inExpression) {
-            Expression<String> expression = inExpression;
-            for (int i = 0; i < characters.length(); i++) {
-                expression = criteriaBuilder.function("replace", String.class, expression,
-                        criteriaBuilder.literal(characters.charAt(i)), criteriaBuilder.literal(""));
-            }
-            return expression;
-        }
-
     }
 
     private Component createGrid() {
-        grid = new Grid<>(SamplePerson.class, false);
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        grid.addColumn("role").setAutoWidth(true);
+        grid = new Grid<>(Monitor.class, false);
 
-        grid.setItems(query -> samplePersonService.list(
+        grid.addColumn("id").setVisible(false);
+        grid.addColumn("amazonChoice").setVisible(false);
+        grid.addColumn("name").setHeader("Product Name").setAutoWidth(true);
+        grid.addColumn(createAffiliateURLRenderer()).setHeader("Affiliate URL").setAutoWidth(true);
+        grid.addColumn(new TextRenderer<>(m -> m.getProductCondition().name())).setHeader("Condition").setAutoWidth(true);
+        grid.addColumn(new NumberRenderer<>(Monitor::getPrice, NumberFormat.getCurrencyInstance())).setHeader("Price").setAutoWidth(true);
+        grid.addColumn(new TextRenderer<>(m -> String.format("%d %s", m.getWarrantyValue(), m.getUnitOfWarranty()))).setHeader("Warranty").setAutoWidth(false);
+        grid.addColumn(new TextRenderer<>(m -> String.format("%d %s", m.getScreenSize(), m.getSizeUnit()))).setHeader("Screen Size").setAutoWidth(true);
+        grid.addColumn(new TextRenderer<>(m -> String.format("%d %s", m.getRefreshRate(), m.getRefreshRateUnit()))).setHeader("Refresh Rate").setAutoWidth(true);
+        grid.addColumn("maxDisplayResolution").setHeader("Max Display Resolution").setAutoWidth(true);
+        grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getDisplayType().name()))).setHeader("Display Type").setAutoWidth(true);
+        grid.addColumn("dimension").setHeader("Dimension").setAutoWidth(true);
+        grid.addColumn(createSpecialFeaturesRenderer()).setHeader("Special Features").setAutoWidth(true);
+        grid.addColumn("brand").setHeader("Brand").setAutoWidth(true);
+        grid.addColumn("color").setHeader("Color").setAutoWidth(true);
+
+        /*rid.setItems(query -> samplePersonService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)),
-                filters).stream());
+                filters).stream());*/
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 
@@ -238,4 +182,14 @@ public class ProductBuyAffiliationView extends Div {
         grid.getDataProvider().refreshAll();
     }
 
+    private ComponentRenderer<Anchor, Monitor> createAffiliateURLRenderer() {
+        return new ComponentRenderer<>(monitor -> new Anchor(monitor.getAffiliateURL().toString(), monitor.getName()));
+    }
+
+    private TextRenderer<Monitor> createSpecialFeaturesRenderer() {
+        ItemLabelGenerator<Monitor> labelGenFunc = m -> m.getSpecialFeatures().stream().map(
+                Monitor.SpecialFeature::toString).collect(Collectors.joining(", "));
+
+        return new TextRenderer<>(labelGenFunc);
+    }
 }

@@ -21,34 +21,35 @@ public class Monitor {
     private EnumSet<SpecialFeature> specialFeatures;
     private String brand;
     private String color;
+    private boolean amazonChoice;
 
-    enum Condition {
+    public enum Condition {
         NEW,
         USED
     }
 
-    enum Warranty {
-        MONTHS,
-        YEARS,
-        WEEKS,
-        DAYS
+    public enum Warranty {
+        Months,
+        Years,
+        Weeks,
+        Days
     }
 
-    enum ScreenSizeUnit {
-        INCHES,
-        CM
+    public enum ScreenSizeUnit {
+        Inches,
+        Centimetres
     }
 
-    enum RefreshRateFrequency {
+    public enum RefreshRateFrequency {
         Hz
     }
 
-    enum DisplayType {
+    public enum DisplayType {
         LED,
         LCD
     }
 
-    enum SpecialFeature {
+    public enum SpecialFeature {
         CurvedScreen,
         TiltAdjustment,
         FlickerFree
@@ -188,5 +189,13 @@ public class Monitor {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public boolean isAmazonChoice() {
+        return amazonChoice;
+    }
+
+    public void setAmazonChoice(boolean amazonChoice) {
+        this.amazonChoice = amazonChoice;
     }
 }
