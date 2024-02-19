@@ -2,8 +2,11 @@ package com.product.affiliation.views.productbuyaffiliation;
 
 import com.product.affiliation.data.Monitor;
 import com.product.affiliation.query.EqualsOperator;
+import com.product.affiliation.query.GtOperator;
 import com.product.affiliation.query.InOperator;
+import com.product.affiliation.query.LtOperator;
 import com.product.affiliation.query.Operator;
+import com.product.affiliation.query.RangeOperator;
 import com.product.affiliation.services.MonitorService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -47,7 +50,7 @@ public class ProductBuyAffiliationView extends Div {
     private Grid<Monitor> grid;
     private Filters filtersComponent;
     private final MonitorService monitorService;
-    private final Map<String, Operator<String>> filtersCriteria;
+    private final Map<String, Operator<?>> filtersCriteria;
 
     public ProductBuyAffiliationView(MonitorService monitorService) {
         this.monitorService = monitorService;
@@ -154,7 +157,7 @@ public class ProductBuyAffiliationView extends Div {
             actions.addClassName(LumoUtility.Gap.SMALL);
             actions.addClassName("actions");
 
-            add(amazonChoiceYesOrNo, refreshRate, brand, connectivityTech, condition, priceFromField, priceToField, screenSize, displayResolution, displayType, color, actions);
+            add(brand, connectivityTech, refreshRate, screenSize, displayResolution, displayType, priceFromField, priceToField, amazonChoiceYesOrNo, condition, color, actions);
 
             refreshRate.addValueChangeListener(valueChangeEvent ->
                     filtersCriteria.compute("refreshRate", (k, v) -> new EqualsOperator("refreshRate", Set.of(valueChangeEvent.getValue()))));
@@ -180,6 +183,13 @@ public class ProductBuyAffiliationView extends Div {
 
             amazonChoiceYesOrNo.addValueChangeListener(valueChangeEvent ->
                     filtersCriteria.compute("amazonChoiceYesOrNo", (k, v) -> new EqualsOperator("amazonChoiceYesOrNo", Set.of(valueChangeEvent.getValue()))));
+
+            //new RangeOperator<Double>("priceFromToField", Set.<Double>of(valueChangeEvent.getValue(), null))));
+            priceFromField.addValueChangeListener(valueChangeEvent ->
+                    filtersCriteria.compute("priceFromField", (k, v) -> new GtOperator<Double>("priceFromField", Set.of(valueChangeEvent.getValue()))));
+
+            priceToField.addValueChangeListener(valueChangeEvent ->
+                    filtersCriteria.compute("priceToField", (k, v) -> new LtOperator<Double>("priceToField", Set.of(valueChangeEvent.getValue()))));
         }
     }
 
@@ -211,7 +221,7 @@ public class ProductBuyAffiliationView extends Div {
     }
 
     private void refreshGrid() {
-        Query<?, Map<String, Operator<String>>> queryFilter = new Query<>(filtersCriteria);
+        Query<?, Map<String, Operator<?>>> queryFilter = new Query<>(filtersCriteria);
         List<Monitor> allMonitors = monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(),
                 queryFilter.getFilter().orElse(Collections.emptyMap()));
 
