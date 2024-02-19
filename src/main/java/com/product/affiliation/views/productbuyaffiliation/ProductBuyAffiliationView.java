@@ -1,7 +1,10 @@
 package com.product.affiliation.views.productbuyaffiliation;
 
 import com.product.affiliation.data.Monitor;
-import com.product.affiliation.services.SamplePersonService;
+import com.product.affiliation.query.EqualsOperator;
+import com.product.affiliation.query.InOperator;
+import com.product.affiliation.query.Operator;
+import com.product.affiliation.services.MonitorService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.Button;
@@ -20,24 +23,21 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import java.text.NumberFormat;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 
 @PageTitle("Product Buy Affiliation")
 @Route(value = "product-buy-affiliation")
@@ -45,20 +45,24 @@ import org.springframework.data.jpa.domain.Specification;
 public class ProductBuyAffiliationView extends Div {
 
     private Grid<Monitor> grid;
+    private Filters filtersComponent;
+    private final MonitorService monitorService;
+    private final Map<String, Operator<String>> filtersCriteria;
 
-    private Filters filters;
-    private final SamplePersonService samplePersonService;
+    public ProductBuyAffiliationView(MonitorService monitorService) {
+        this.monitorService = monitorService;
+        this.filtersCriteria = new ConcurrentHashMap<>();
 
-    public ProductBuyAffiliationView(SamplePersonService SamplePersonService) {
-        this.samplePersonService = SamplePersonService;
         setSizeFull();
         addClassNames("product-buy-affiliation-view");
 
-        filters = new Filters(() -> refreshGrid());
-        VerticalLayout layout = new VerticalLayout(createMobileFilters(), filters, createGrid());
+        filtersComponent = new Filters(monitorService, () -> refreshGrid());
+        VerticalLayout layout = new VerticalLayout(createMobileFilters(), filtersComponent, createGrid());
         layout.setSizeFull();
         layout.setPadding(false);
         layout.setSpacing(false);
+        layout.getThemeList().add(Lumo.DARK);
+
         add(layout);
     }
 
@@ -75,18 +79,19 @@ public class ProductBuyAffiliationView extends Div {
         mobileFilters.add(mobileIcon, filtersHeading);
         mobileFilters.setFlexGrow(1, filtersHeading);
         mobileFilters.addClickListener(e -> {
-            if (filters.getClassNames().contains("visible")) {
-                filters.removeClassName("visible");
+            if (filtersComponent.getClassNames().contains("visible")) {
+                filtersComponent.removeClassName("visible");
                 mobileIcon.getElement().setAttribute("icon", "lumo:plus");
             } else {
-                filters.addClassName("visible");
+                filtersComponent.addClassName("visible");
                 mobileIcon.getElement().setAttribute("icon", "lumo:minus");
             }
         });
         return mobileFilters;
     }
 
-    public static class Filters extends Div {
+    public class Filters extends Div {
+        private final MonitorService _monitorService;
         private final Checkbox amazonChoiceYesOrNo = new Checkbox("Is Amazon choice?");
         private final ComboBox<String> refreshRate = new ComboBox("Refresh Rate");
         private final MultiSelectComboBox<String> brand = new MultiSelectComboBox<>("Brand");
@@ -99,25 +104,26 @@ public class ProductBuyAffiliationView extends Div {
         private final ComboBox<String> displayType = new ComboBox<>("Display Type");
         private final CheckboxGroup<String> color = new CheckboxGroup<>("Colour");
 
-        public Filters(Runnable onSearch) {
+        public Filters(MonitorService monitorService, Runnable onSearch) {
+            _monitorService = monitorService;
             setWidthFull();
             addClassName("filter-layout");
             addClassNames(LumoUtility.Padding.Horizontal.LARGE, LumoUtility.Padding.Vertical.MEDIUM,
                     LumoUtility.BoxSizing.BORDER);
-
-            refreshRate.setItems("60 Hz, 100 Hz"); //TODO: COme from database/backend
-            brand.setItems("Dell", "HP"); //TODO: COme from backend
             brand.addClassName("double-width");
-            connectivityTech.setItems("VGA", "HDMI"); //TODO: COme from backend
-            connectivityTech.addClassName("double-width");
-            condition.setItems("New", "Used"); //TODO: COme from backend
             condition.addClassName("double-width");
+            connectivityTech.addClassName("double-width");
             priceFromField.setPrefixComponent(new Div("£"));
             priceToField.setPrefixComponent(new Div("£"));
-            screenSize.setItems("27 Inch, 32 Inch"); //TODO: COme from backend
-            displayResolution.setItems("1920 x 3242", "2560 x 1990"); //TODO: COme from backend
-            displayType.setItems("Ips"); //TODO: COme from backend
-            color.setItems("Black", "White");
+
+            refreshRate.setItems(_monitorService.getProjectedUniqueItems("refreshRate"));
+            brand.setItems(_monitorService.getProjectedUniqueItems("brand"));
+            connectivityTech.setItems(_monitorService.getProjectedUniqueItems("connectivityTech"));
+            condition.setItems(_monitorService.getProjectedUniqueItems("productCondition"));
+            color.setItems(_monitorService.getProjectedUniqueItems("color"));
+            screenSize.setItems(_monitorService.getProjectedUniqueItems("screenSize"));
+            displayResolution.setItems(_monitorService.getProjectedUniqueItems("displayResolution"));
+            displayType.setItems(_monitorService.getProjectedUniqueItems("displayType"));
 
             // Action buttons
             Button resetBtn = new Button("Reset");
@@ -134,19 +140,46 @@ public class ProductBuyAffiliationView extends Div {
                 displayResolution.clear();
                 displayType.clear();
                 color.clear();
-
+                filtersCriteria.clear();
                 onSearch.run();
             });
 
             Button searchBtn = new Button("Search");
             searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            searchBtn.addClickListener(e -> onSearch.run());
+            searchBtn.addClickListener(e -> {
+                onSearch.run();
+            });
 
             Div actions = new Div(resetBtn, searchBtn);
             actions.addClassName(LumoUtility.Gap.SMALL);
             actions.addClassName("actions");
 
             add(amazonChoiceYesOrNo, refreshRate, brand, connectivityTech, condition, priceFromField, priceToField, screenSize, displayResolution, displayType, color, actions);
+
+            refreshRate.addValueChangeListener(valueChangeEvent ->
+                    filtersCriteria.compute("refreshRate", (k, v) -> new EqualsOperator("refreshRate", Set.of(valueChangeEvent.getValue()))));
+
+            brand.addSelectionListener(valueChangeEvent ->
+                    filtersCriteria.compute("brand", (k, v) -> new InOperator("brand", valueChangeEvent.getAllSelectedItems())));
+
+            connectivityTech.addSelectionListener(valueChangeEvent ->
+                    filtersCriteria.compute("connectivityTech", (k, v) -> new InOperator("connectivityTech", valueChangeEvent.getAllSelectedItems())));
+
+            screenSize.addSelectionListener(valueChangeEvent ->
+                    filtersCriteria.compute("screenSize", (k, v) -> new InOperator("screenSize", valueChangeEvent.getAllSelectedItems())));
+
+            displayResolution.addValueChangeListener(valueChangeEvent ->
+                    filtersCriteria.compute("displayResolution", (k, v) -> new EqualsOperator("displayResolution", Set.of(valueChangeEvent.getValue()))));
+
+            displayType.addValueChangeListener(valueChangeEvent ->
+                    filtersCriteria.compute("displayType", (k, v) -> new EqualsOperator("displayType", Set.of(valueChangeEvent.getValue()))));
+
+            condition.addSelectionListener(multiSelectionListener -> filtersCriteria.compute( "condition" , (k, v) -> new InOperator("screenSize", multiSelectionListener.getAllSelectedItems())));
+
+            color.addSelectionListener(multiSelectionListener -> filtersCriteria.compute( "color" , (k, v) -> new InOperator("color", multiSelectionListener.getAllSelectedItems())));
+
+            amazonChoiceYesOrNo.addValueChangeListener(valueChangeEvent ->
+                    filtersCriteria.compute("amazonChoiceYesOrNo", (k, v) -> new EqualsOperator("amazonChoiceYesOrNo", Set.of(valueChangeEvent.getValue()))));
         }
     }
 
@@ -169,16 +202,20 @@ public class ProductBuyAffiliationView extends Div {
         grid.addColumn("brand").setHeader("Brand").setAutoWidth(true);
         grid.addColumn("color").setHeader("Color").setAutoWidth(true);
 
-        /*rid.setItems(query -> samplePersonService.list(
-                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)),
-                filters).stream());*/
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.setItems(query -> monitorService.findAllMonitors(query.getOffset(), query.getLimit(), filtersCriteria).stream());
+
+        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COLUMN_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 
         return grid;
     }
 
     private void refreshGrid() {
+        Query<?, Map<String, Operator<String>>> queryFilter = new Query<>(filtersCriteria);
+        List<Monitor> allMonitors = monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(),
+                queryFilter.getFilter().orElse(Collections.emptyMap()));
+
+        grid.setItems(allMonitors);
         grid.getDataProvider().refreshAll();
     }
 

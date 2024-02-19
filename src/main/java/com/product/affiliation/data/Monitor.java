@@ -22,6 +22,7 @@ public class Monitor {
     private String brand;
     private String color;
     private boolean amazonChoice;
+    private EnumSet<ConnectivityTech> connectivityTech;
 
     public enum Condition {
         NEW,
@@ -53,6 +54,22 @@ public class Monitor {
         CurvedScreen,
         TiltAdjustment,
         FlickerFree
+    }
+
+    public enum ConnectivityTech {
+        USBC("USB Type C"),
+        HDMI("HDMI"),
+        USBA("USB Type A");
+
+        private final String desc;
+        ConnectivityTech(String desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            return this.desc;
+        }
     }
 
     public long getId() {
@@ -197,5 +214,13 @@ public class Monitor {
 
     public void setAmazonChoice(boolean amazonChoice) {
         this.amazonChoice = amazonChoice;
+    }
+
+    public EnumSet<ConnectivityTech> getConnectivityTech() {
+        return connectivityTech;
+    }
+
+    public void setConnectivityTech(EnumSet<ConnectivityTech> connectivityTech) {
+        this.connectivityTech = connectivityTech;
     }
 }

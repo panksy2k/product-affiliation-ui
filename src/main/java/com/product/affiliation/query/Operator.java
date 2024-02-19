@@ -1,13 +1,13 @@
 package com.product.affiliation.query;
 
-import java.util.List;
+import java.util.Set;
 
 public interface Operator<V> {
     default String name() {
         return getClass().getSimpleName();
     }
 
-    List<V> values();
+    Set<V> values();
 
     String getColumnName();
 }

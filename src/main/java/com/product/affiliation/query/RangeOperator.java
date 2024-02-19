@@ -1,13 +1,13 @@
 package com.product.affiliation.query;
 
-import java.util.List;
+import java.util.Set;
 
 public class RangeOperator<V> implements Operator<V> {
 
     private final String columnName;
-    private final List<V> rangeValues;
+    private final Set<V> rangeValues;
 
-    public RangeOperator(String columnName, List<V> allValues) {
+    public RangeOperator(String columnName, Set<V> allValues) {
         this.columnName = columnName;
 
         if(allValues == null || allValues.size() != 2) {
@@ -18,7 +18,7 @@ public class RangeOperator<V> implements Operator<V> {
     }
 
     @Override
-    public List<V> values() {
+    public Set<V> values() {
         return rangeValues;
     }
 

@@ -1,15 +1,15 @@
 package com.product.affiliation.query;
 
-import java.util.List;
+import java.util.Set;
 
 public class InOperator<V> implements Operator<V> {
 
     private final String columnName;
-    private final List<V> allInclusiveValues;
+    private final Set<V> allInclusiveValues;
 
-    public InOperator(String columnName, List<V> allValues) {
+    public InOperator(String columnName, Set<V> allValues) {
         this.columnName = columnName;
-        if(allValues == null || allValues.isEmpty()) {
+        if(allValues == null) {
             throw new IllegalArgumentException("InOperator should at least have 1 value for SQL expression");
         }
 
@@ -17,7 +17,7 @@ public class InOperator<V> implements Operator<V> {
     }
 
     @Override
-    public List<V> values() {
+    public Set<V> values() {
         return allInclusiveValues;
     }
 

@@ -1,15 +1,13 @@
 package com.product.affiliation.query;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public class EqualsOperator<V> implements Operator<V> {
 
     private final String columnName;
-    private final V value;
+    private final Set<V> value;
 
-    public EqualsOperator(String columnName, V value) {
+    public EqualsOperator(String columnName, Set<V> value) {
         this.columnName = columnName;
         if(value == null) {
             throw new IllegalArgumentException("EqualsOperator should not be null");
@@ -19,8 +17,8 @@ public class EqualsOperator<V> implements Operator<V> {
     }
 
     @Override
-    public List<V> values() {
-        return Stream.of(value).collect(Collectors.toList());
+    public Set<V> values() {
+        return value;
     }
 
     @Override
