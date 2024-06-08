@@ -3,13 +3,9 @@ package com.product.affiliation.query;
 import java.util.Set;
 
 public class LtOperator<V> implements Operator<V> {
-
-    private final String columnName;
     private final Set<V> minRangeValue;
 
-    public LtOperator(String columnName, Set<V> atleastValue) {
-        this.columnName = columnName;
-
+    public LtOperator(Set<V> atleastValue) {
         if(atleastValue == null || atleastValue.size() != 1) {
             throw new IllegalArgumentException("LtOperator should have 1 value for SQL expression");
         }
@@ -27,8 +23,4 @@ public class LtOperator<V> implements Operator<V> {
         return minRangeValue;
     }
 
-    @Override
-    public String getColumnName() {
-        return columnName;
-    }
 }

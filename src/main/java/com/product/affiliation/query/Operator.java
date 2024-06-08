@@ -9,5 +9,4 @@ public interface Operator<V> {
 
     Set<V> values();
 
-    String getColumnName();
 }

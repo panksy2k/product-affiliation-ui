@@ -3,13 +3,9 @@ package com.product.affiliation.query;
 import java.util.Set;
 
 public class GtOperator<V> implements Operator<V> {
-
-    private final String columnName;
     private final Set<V> maxRangeValue;
 
-    public GtOperator(String columnName, Set<V> allValues) {
-        this.columnName = columnName;
-
+    public GtOperator(Set<V> allValues) {
         if(allValues == null || allValues.size() != 1) {
             throw new IllegalArgumentException("GtOperator should have 1 value for SQL expression");
         }
@@ -24,10 +20,5 @@ public class GtOperator<V> implements Operator<V> {
     @Override
     public Set<V> values() {
         return maxRangeValue;
-    }
-
-    @Override
-    public String getColumnName() {
-        return columnName;
     }
 }

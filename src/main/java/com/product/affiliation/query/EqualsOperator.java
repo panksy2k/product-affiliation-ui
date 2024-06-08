@@ -3,12 +3,9 @@ package com.product.affiliation.query;
 import java.util.Set;
 
 public class EqualsOperator<V> implements Operator<V> {
-
-    private final String columnName;
     private final Set<V> value;
 
-    public EqualsOperator(String columnName, Set<V> value) {
-        this.columnName = columnName;
+    public EqualsOperator(Set<V> value) {
         if(value == null) {
             throw new IllegalArgumentException("EqualsOperator should not be null");
         }
@@ -19,10 +16,5 @@ public class EqualsOperator<V> implements Operator<V> {
     @Override
     public Set<V> values() {
         return value;
-    }
-
-    @Override
-    public String getColumnName() {
-        return columnName;
     }
 }
