@@ -1,12 +1,16 @@
 package com.product.affiliation.util;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class CompletableFutures {
+    public static final CompletableFuture<List<String>> completedEmptyList = CompletableFuture.completedFuture(Collections.<String>emptyList());
 
     /**
      * It waits until {@link CompletableFuture} is completed.
@@ -24,5 +28,13 @@ public class CompletableFutures {
         } catch(TimeoutException e) {
             return false;
         }
+    }
+
+    public static CompletionException throwCompletionExceptionIfNot(Throwable e) {
+      if(e instanceof CompletionException) {
+        return (CompletionException) e;
+      }
+
+      return new CompletionException(e);
     }
 }

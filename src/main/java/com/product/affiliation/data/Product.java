@@ -4,11 +4,12 @@ import java.net.URL;
 import java.util.EnumSet;
 
 public class Product {
-  private long id;
+  private String id;
   private String name;
+  private String modelName;
   private URL affiliateURL;
   private Condition productCondition;
-  private Double price;
+  private String price;
   private String warrantyValue;
   private String screenSize;
   private String refreshRate;
@@ -21,10 +22,10 @@ public class Product {
   private boolean amazonChoice;
   private EnumSet<ConnectivityTech> connectivityTech;
   private ProductType type;
+  private String responseTime;
 
   public enum Condition {
-    NEW,
-    USED
+    New, Used
   }
 
   public enum DisplayType {
@@ -67,11 +68,11 @@ public class Product {
     this.type = type;
   }
 
-  public long getId() {
+  public String getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(String id) {
     this.id = id;
   }
 
@@ -99,11 +100,11 @@ public class Product {
     this.productCondition = productCondition;
   }
 
-  public Double getPrice() {
+  public String getPrice() {
     return price;
   }
 
-  public void setPrice(Double price) {
+  public void setPrice(String price) {
     this.price = price;
   }
 
@@ -193,5 +194,21 @@ public class Product {
 
   public void setRefreshRate(String refreshRate) {
     this.refreshRate = refreshRate;
+  }
+
+  public String getModelName() {
+    return modelName;
+  }
+
+  public void setModelName(String modelName) {
+    this.modelName = modelName;
+  }
+
+  public String getResponseTime() {
+    return responseTime;
+  }
+
+  public void setResponseTime(String responseTime) {
+    this.responseTime = responseTime;
   }
 }

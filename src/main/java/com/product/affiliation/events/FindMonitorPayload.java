@@ -1,15 +1,17 @@
 package com.product.affiliation.events;
 
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Collection;
+import java.util.Map;
 
 public class FindMonitorPayload extends ProductPayload {
-  private static final String TYPE = "FIND_MONITOR";
+  static final String TYPE = "FIND_MONITOR";
 
-  private final String queryPayload;
+  @JsonProperty
+  private Map<String, Collection<?>> queryAttributes;
 
-  public FindMonitorPayload(UUID id, String queryPayload) {
+  public FindMonitorPayload(@JsonProperty("id") String id) {
     super(id);
-    this.queryPayload = queryPayload;
   }
 
   @Override
@@ -17,7 +19,11 @@ public class FindMonitorPayload extends ProductPayload {
     return TYPE;
   }
 
-  public String getQueryPayload() {
-    return queryPayload;
+  public Map<String, Collection<?>> getQueryAttributes() {
+    return queryAttributes;
+  }
+
+  public void setQueryAttributes(Map<String, Collection<?>> queryAttributes) {
+    this.queryAttributes = queryAttributes;
   }
 }

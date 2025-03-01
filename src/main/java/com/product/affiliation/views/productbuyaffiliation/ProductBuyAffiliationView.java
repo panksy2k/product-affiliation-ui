@@ -1,10 +1,6 @@
 package com.product.affiliation.views.productbuyaffiliation;
 
 import com.product.affiliation.data.Product;
-import com.product.affiliation.query.EqualsOperator;
-import com.product.affiliation.query.GtOperator;
-import com.product.affiliation.query.InOperator;
-import com.product.affiliation.query.LtOperator;
 import com.product.affiliation.services.MonitorService;
 import com.product.affiliation.util.CompletableFutures;
 import com.product.affiliation.util.Threads;
@@ -25,17 +21,17 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -102,13 +98,13 @@ public class ProductBuyAffiliationView extends Div {
     public class Filters extends Div {
         private final MonitorService _monitorService;
         private final Checkbox amazonChoiceYesOrNo = new Checkbox("Is Amazon choice?");
-        private final ComboBox<String> refreshRate = new ComboBox("Refresh Rate");
+        private final MultiSelectComboBox<String> refreshRateMultiCombo = new MultiSelectComboBox("Refresh Rate");
         private final MultiSelectComboBox<String> brand = new MultiSelectComboBox<>("Brand");
         private final MultiSelectComboBox<String> connectivityTech = new MultiSelectComboBox<>("Connectivity Tech");
-        private final CheckboxGroup<String> condition = new CheckboxGroup<>("Condition");
+        private final RadioButtonGroup<String> condition = new RadioButtonGroup<>("Condition");
         private final NumberField priceFromField = new NumberField("Price From");
         private final NumberField priceToField = new NumberField("Price To");
-        private final MultiSelectComboBox<String> screenSize = new MultiSelectComboBox<>("Screen Size");
+        private final MultiSelectComboBox<String> screenSizeMultiCombo = new MultiSelectComboBox<>("Screen Size");
         private final ComboBox<String> displayResolution = new ComboBox<>("Max display resolution");
         private final ComboBox<String> displayType = new ComboBox<>("Display Type");
         private final CheckboxGroup<String> color = new CheckboxGroup<>("Colour");
@@ -132,13 +128,13 @@ public class ProductBuyAffiliationView extends Div {
             resetBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             resetBtn.addClickListener(e -> {
                 amazonChoiceYesOrNo.clear();
-                refreshRate.clear();
+                refreshRateMultiCombo.clear();
                 brand.clear();
                 connectivityTech.clear();
                 condition.clear();
                 priceFromField.clear();
                 priceToField.clear();
-                screenSize.clear();
+                screenSizeMultiCombo.clear();
                 displayResolution.clear();
                 displayType.clear();
                 color.clear();
@@ -157,9 +153,9 @@ public class ProductBuyAffiliationView extends Div {
             actions.addClassName(LumoUtility.Gap.SMALL);
             actions.addClassName("actions");
 
-            add(brand, connectivityTech, refreshRate, screenSize, displayResolution, displayType, priceFromField, priceToField, amazonChoiceYesOrNo, condition, color, actions);
+            add(brand, connectivityTech, refreshRateMultiCombo, screenSizeMultiCombo, displayResolution, displayType, priceFromField, priceToField, amazonChoiceYesOrNo, condition, color, actions);
 
-            brand.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("brand",
+            /*brand.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("brand",
                     (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
                                     new InOperator<String>(Set.<String>copyOf(valueChangeEvent.getValue())) :
                             v));
@@ -167,9 +163,7 @@ public class ProductBuyAffiliationView extends Div {
                     (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
                                     new InOperator<String>(Set.copyOf(valueChangeEvent.getValue())) :
                             v));
-            screenSize.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("screenSize",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
-                                    new InOperator<String>(Set.copyOf(valueChangeEvent.getValue())) :
+
                             v));
             condition.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("productCondition",
                     (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
@@ -178,70 +172,68 @@ public class ProductBuyAffiliationView extends Div {
             color.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("color",
                     (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
                                     new InOperator<String>(Set.copyOf(valueChangeEvent.getValue())) :
-                            v));
+                            v));*/
 
-            refreshRate.addValueChangeListener(valueChangeEvent -> filterCriteria.addDataOperation("refreshRate",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue())?
-                                    new EqualsOperator(Set.of(valueChangeEvent.getValue())) :
-                            v));
-            displayResolution.addValueChangeListener(valueChangeEvent -> filterCriteria.addDataOperation("displayResolution",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue())?
-                                    new EqualsOperator(Set.of(valueChangeEvent.getValue())) :
-                            v));
-            displayType.addValueChangeListener(valueChangeEvent -> filterCriteria.addDataOperation("displayType",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue())?
-                                    new EqualsOperator(Set.of(valueChangeEvent.getValue())) :
-                            v));
-            amazonChoiceYesOrNo.addValueChangeListener(valueChangeEvent -> filterCriteria.addDataOperation("amazonChoiceYesOrNo",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue())?
-                                    new EqualsOperator(Set.of(valueChangeEvent.getValue())) :
-                            v));
+          condition.addValueChangeListener(valueChangeEvent -> {
+            if(!Objects.isNull(valueChangeEvent.getValue())) {
+              filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IS, "productCondition", Set.of(valueChangeEvent.getValue())));
+            } else {
+              filterCriteria.removeDataOperation(ProductQuery.of(null, "productCondition", Collections.emptySet()));
+            }
+          });
 
-            priceFromField.addValueChangeListener(valueChangeEvent -> filterCriteria.addDataOperation("priceFrom",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue())?
-                                    new GtOperator(Set.of(valueChangeEvent.getValue())) :
-                            v));
-            priceToField.addValueChangeListener(valueChangeEvent -> filterCriteria.addDataOperation("priceTo",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue())?
-                                    new LtOperator(Set.of(valueChangeEvent.getValue())) :
-                            v));
+          refreshRateMultiCombo.addValueChangeListener(valueChangeEvent -> {
+              if(!Objects.isNull(valueChangeEvent.getValue())) {
+                filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IN, "refreshRate", Set.of(valueChangeEvent.getValue())));
+              } else {
+                filterCriteria.removeDataOperation(ProductQuery.of(null, "refreshRate", Collections.emptySet()));
+              }
+            });
+
+            screenSizeMultiCombo.addValueChangeListener(valueChangeEvent -> {
+              if(!Objects.isNull(valueChangeEvent.getValue())) {
+                filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IN, "screenSize", Set.of(valueChangeEvent.getValue())));
+              } else {
+                filterCriteria.removeDataOperation(ProductQuery.of(null, "screenSize", Collections.emptySet()));
+              }
+            });
         }
 
         private void fetchFilterData(ExecutorService filterExecutors) {
-            CompletableFuture<List<String>> refreshRateFuture = _monitorService.getProjectedUniqueItems("refreshRate", filterExecutors);
-            refreshRateFuture.thenAccept(refreshRate::setItems);
+            CompletableFuture<Set<String>> refreshRateFuture = _monitorService.getProjectedUniqueItems("refreshRate", filterExecutors);
+            refreshRateFuture.thenAccept(refreshRateMultiCombo::setItems);
 
-            CompletableFuture<List<String>> refreshBrand = _monitorService.getProjectedUniqueItems("brand", filterExecutors);
+            CompletableFuture<Set<String>> refreshBrand = _monitorService.getProjectedUniqueItems("brand", filterExecutors);
             refreshBrand.thenAccept(brand::setItems);
 
-            CompletableFuture<List<String>> refreshConnectivityTech = _monitorService.getProjectedUniqueItems("connectivityTech", filterExecutors);
+            CompletableFuture<Set<String>> refreshConnectivityTech = _monitorService.getProjectedUniqueItems("connectivityTech", filterExecutors);
             refreshConnectivityTech.thenAccept(connectivityTech::setItems);
 
-            CompletableFuture<List<String>> refreshProductCondition = _monitorService.getProjectedUniqueItems("productCondition", filterExecutors);
+            CompletableFuture<Set<String>> refreshProductCondition = _monitorService.getProjectedUniqueItems("productCondition", filterExecutors);
             refreshProductCondition.thenAccept(condition::setItems);
 
-            CompletableFuture<List<String>> refreshColor = _monitorService.getProjectedUniqueItems("color", filterExecutors);
+            CompletableFuture<Set<String>> refreshColor = _monitorService.getProjectedUniqueItems("color", filterExecutors);
             refreshColor.thenAccept(color::setItems);
 
-            CompletableFuture<List<String>> refreshScreenSize = _monitorService.getProjectedUniqueItems("screenSize", filterExecutors);
-            refreshScreenSize.thenAccept(screenSize::setItems);
+            CompletableFuture<Set<String>> refreshScreenSize = _monitorService.getProjectedUniqueItems("screenSize", filterExecutors);
+            refreshScreenSize.thenAccept(screenSizeMultiCombo::setItems);
 
-            CompletableFuture<List<String>> refreshDisplayResolution = _monitorService.getProjectedUniqueItems("displayResolution", filterExecutors);
+            CompletableFuture<Set<String>> refreshDisplayResolution = _monitorService.getProjectedUniqueItems("displayResolution", filterExecutors);
             refreshDisplayResolution.thenAccept(displayResolution::setItems);
 
-            CompletableFuture<List<String>> refreshDisplayType = _monitorService.getProjectedUniqueItems("displayType", filterExecutors);
+            CompletableFuture<Set<String>> refreshDisplayType = _monitorService.getProjectedUniqueItems("displayType", filterExecutors);
             refreshDisplayType.thenAccept(displayType::setItems);
 
-            List<CompletableFuture<List<String>>> allFutureList = Arrays.asList(refreshRateFuture, refreshBrand,
+            List<CompletableFuture<Set<String>>> allFutureList = Arrays.asList(refreshRateFuture, refreshBrand,
                     refreshConnectivityTech, refreshColor, refreshProductCondition, refreshScreenSize,
                     refreshDisplayResolution, refreshDisplayType);
 
             try {
-                for(CompletableFuture<List<String>> future : allFutureList) {
+                for(CompletableFuture<Set<String>> future : allFutureList) {
                     CompletableFutures.uncheckedAwait(future, 30, TimeUnit.SECONDS);
                 }
             } catch (InterruptedException e) {
-
+                e.printStackTrace();
             }
 
             filterExecutors.shutdown();
@@ -256,18 +248,25 @@ public class ProductBuyAffiliationView extends Div {
         grid.addColumn("name").setHeader("Product Name").setAutoWidth(true);
         grid.addColumn(createAffiliateURLRenderer()).setHeader("Affiliate URL").setAutoWidth(true);
         grid.addColumn(new TextRenderer<>(m -> m.getProductCondition().name())).setHeader("Condition").setAutoWidth(true);
-        grid.addColumn(new NumberRenderer<>(Product::getPrice, NumberFormat.getCurrencyInstance())).setHeader("Price").setAutoWidth(true);
+        grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getPrice()))).setHeader("Price").setAutoWidth(true);
         grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getWarrantyValue()))).setHeader("Warranty").setAutoWidth(false);
         grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getScreenSize()))).setHeader("Screen Size").setAutoWidth(true);
         grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getRefreshRate()))).setHeader("Refresh Rate").setAutoWidth(true);
         grid.addColumn("maxDisplayResolution").setHeader("Max Display Resolution").setAutoWidth(true);
-        grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getDisplayType().name()))).setHeader("Display Type").setAutoWidth(true);
-        grid.addColumn("dimension").setHeader("Dimension").setAutoWidth(true);
-        grid.addColumn(createSpecialFeaturesRenderer()).setHeader("Special Features").setAutoWidth(true);
-        grid.addColumn("brand").setHeader("Brand").setAutoWidth(true);
-        grid.addColumn("color").setHeader("Color").setAutoWidth(true);
+        //grid.addColumn(new TextRenderer<>(m -> String.format("%s", m.getDisplayType().name()))).setHeader("Display Type").setAutoWidth(true);
+        //grid.addColumn("dimension").setHeader("Dimension").setAutoWidth(true);
+        //grid.addColumn(createSpecialFeaturesRenderer()).setHeader("Special Features").setAutoWidth(true);
+        //grid.addColumn("brand").setHeader("Brand").setAutoWidth(true);
+        //grid.addColumn("color").setHeader("Color").setAutoWidth(true);
 
-        grid.setItems(query -> monitorService.findAllMonitors(query.getOffset(), query.getLimit(), filterCriteria).stream());
+        CompletableFuture<List<Product>> allMonitors = monitorService.findAllMonitors(0, 0, filterCriteria);
+        List allProducts = null;
+        try {
+          allProducts = allMonitors.get(10, TimeUnit.SECONDS);
+        } catch(Exception e) {
+          e.printStackTrace();
+          allProducts = Collections.emptyList();
+        }
 
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COLUMN_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
@@ -276,12 +275,23 @@ public class ProductBuyAffiliationView extends Div {
     }
 
     private void refreshGrid() {
-        Query<?, FilterCriteria> queryFilter = new Query<>(filterCriteria);
-        List<Product> allProducts = monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(),
-                queryFilter.getFilter().orElse(null));
+      Query<?, FilterCriteria> queryFilter = new Query<>(filterCriteria);
+      List<Product> matchedProducts = (List<Product>) monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(),
+        queryFilter.getFilter().orElse(null)).join();
 
-        grid.setItems(allProducts);
-        grid.getDataProvider().refreshAll();
+      System.out.println(matchedProducts);
+      grid.setItems(matchedProducts);
+
+/*      monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(), queryFilter.getFilter().orElse(null))
+                    .thenAccept(itms -> {
+                      System.out.println(itms);
+                      grid.setItems((List<Product>) itms);
+                    })
+                    .exceptionally(e -> {
+                      System.out.println(e);
+                      grid.setItems(Collections.emptyList());
+                      return null;
+                    });*/
     }
 
     private ComponentRenderer<Anchor, Product> createAffiliateURLRenderer() {

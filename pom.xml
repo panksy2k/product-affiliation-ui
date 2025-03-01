@@ -29,6 +29,21 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+          <id>private-repository</id>
+          <name>Hazelcast Private Repository</name>
+          <url>https://repository.hazelcast.com/release/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -40,6 +55,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+          <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java-bom</artifactId>
+            <version>4.4.5</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -59,12 +81,6 @@
             <version>2.0.0</version>
         </dependency>
 
-        <!--<dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>-->
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -75,13 +91,47 @@
             <artifactId>vaadin-testbench-junit5</artifactId>
             <scope>test</scope>
         </dependency>
+    <!--  <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka-clients</artifactId>
+        <version>2.4.0</version>
+      </dependency>-->
       <dependency>
-          <groupId>org.apache.kafka</groupId>
-          <artifactId>kafka-clients</artifactId>
-          <version>2.4.0</version>
+        <groupId>com.obsidiandynamics.fulcrum</groupId>
+        <artifactId>fulcrum-worker</artifactId>
+        <version>0.39.0</version>
       </dependency>
-    </dependencies>
+      <dependency>
+        <groupId>com.konghq</groupId>
+        <artifactId>unirest-java-core</artifactId>
+      </dependency>
 
+      <!-- pick a JSON module if you want to parse JSON include one of these: -->
+      <!-- Google GSON -->
+      <dependency>
+        <groupId>com.konghq</groupId>
+        <artifactId>unirest-modules-gson</artifactId>
+      </dependency>
+
+      <!-- OR maybe you like Jackson better? -->
+      <dependency>
+        <groupId>com.konghq</groupId>
+        <artifactId>unirest-modules-jackson</artifactId>
+      </dependency>
+
+      <!-- Hazelcast Client -->
+      <!--<dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-java-client</artifactId>
+        <version>5.5.0-BETA</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast</artifactId>
+        <version>5.5.0</version>
+      </dependency>-->
+    </dependencies>
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
@@ -104,7 +154,6 @@
             </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
             <!-- Production mode is activated using -Pproduction -->
@@ -140,7 +189,6 @@
                 </plugins>
             </build>
         </profile>
-
         <profile>
             <id>it</id>
             <build>
@@ -183,9 +231,29 @@
                             <enableAssertions>true</enableAssertions>
                         </configuration>
                     </plugin>
+
+                  <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.43.0</version> <!-- Use the latest version -->
+                    <executions>
+                      <execution>
+                        <id>format-java</id>
+                        <goals>
+                          <goal>check</goal>  <!-- Check formatting -->
+                          <goal>apply</goal>  <!-- Apply formatting -->
+                        </goals>
+                      </execution>
+                    </executions>
+                    <configuration>
+                      <java>
+                        <googleJavaFormat/>
+                      </java>
+                    </configuration>
+                  </plugin>
+
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>
