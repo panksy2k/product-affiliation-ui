@@ -80,6 +80,8 @@ public class MonitorDataMapper implements Function<JsonNode, List<Product>> {
           throw new ParsingException(e.getMessage());
         }
 
+
+        prd.setMaxDisplayResolution(jsonObject.getString("displayResolution"));
         retrivedProductAttribute.add(prd);
       }
 

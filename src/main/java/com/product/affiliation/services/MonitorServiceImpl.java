@@ -43,9 +43,9 @@ public class MonitorServiceImpl<T> implements MonitorService<T> {
     public CompletableFuture<Set<String>> getProjectedUniqueItems(String attributeColumnName,
                                                                   ExecutorService filterExecutors) {
         switch (attributeColumnName) {
-            case "refreshRate", "screenSize", "productCondition":
+            case "refreshRate", "screenSize", "productCondition", "brandName", "displayResolution":
                 return productDataClient.findProductAttributeByName(ProductTypeEnum.MONITOR.name(), Arrays.asList(attributeColumnName));
-          case "brand", "connectivityTech", "color", "displayResolution", "displayType":
+          case "connectivityTech", "color", "displayType":
               return CompletableFuture.completedFuture(Collections.emptySet());
          default:
                 return CompletableFuture.supplyAsync(() -> Collections.emptySet());

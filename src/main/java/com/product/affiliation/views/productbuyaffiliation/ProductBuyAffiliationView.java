@@ -31,6 +31,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -101,7 +102,7 @@ public class ProductBuyAffiliationView extends Div {
         private final MultiSelectComboBox<String> refreshRateMultiCombo = new MultiSelectComboBox("Refresh Rate");
         private final MultiSelectComboBox<String> brand = new MultiSelectComboBox<>("Brand");
         private final MultiSelectComboBox<String> connectivityTech = new MultiSelectComboBox<>("Connectivity Tech");
-        private final RadioButtonGroup<String> condition = new RadioButtonGroup<>("Condition");
+        private final CheckboxGroup<String> condition = new CheckboxGroup<>("Condition");
         private final NumberField priceFromField = new NumberField("Price From");
         private final NumberField priceToField = new NumberField("Price To");
         private final MultiSelectComboBox<String> screenSizeMultiCombo = new MultiSelectComboBox<>("Screen Size");
@@ -155,11 +156,23 @@ public class ProductBuyAffiliationView extends Div {
 
             add(brand, connectivityTech, refreshRateMultiCombo, screenSizeMultiCombo, displayResolution, displayType, priceFromField, priceToField, amazonChoiceYesOrNo, condition, color, actions);
 
-            /*brand.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("brand",
-                    (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
-                                    new InOperator<String>(Set.<String>copyOf(valueChangeEvent.getValue())) :
-                            v));
-            connectivityTech.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("connectivityTech",
+            brand.addValueChangeListener(valueChangeEvent -> {
+              if(!Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()) {
+                filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IN, "brandName", Set.of(valueChangeEvent.getValue())));
+              } else {
+                filterCriteria.removeDataOperation(ProductQuery.of(null, "brandName", Collections.emptySet()));
+              }
+            });
+
+            displayResolution.addValueChangeListener(valueChangeEvent -> {
+              if(!Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()) {
+                filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IS, "displayResolution", valueChangeEvent.getValue()));
+              } else {
+                filterCriteria.removeDataOperation(ProductQuery.of(null, "displayResolution", Collections.emptySet()));
+              }
+            });
+
+          /*connectivityTech.addSelectionListener(valueChangeEvent -> filterCriteria.addDataOperation("connectivityTech",
                     (k, v) -> !Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()?
                                     new InOperator<String>(Set.copyOf(valueChangeEvent.getValue())) :
                             v));
@@ -175,15 +188,15 @@ public class ProductBuyAffiliationView extends Div {
                             v));*/
 
           condition.addValueChangeListener(valueChangeEvent -> {
-            if(!Objects.isNull(valueChangeEvent.getValue())) {
-              filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IS, "productCondition", Set.of(valueChangeEvent.getValue())));
+            if(!Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()) {
+              filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IN, "productCondition", Set.of(valueChangeEvent.getValue())));
             } else {
               filterCriteria.removeDataOperation(ProductQuery.of(null, "productCondition", Collections.emptySet()));
             }
           });
 
           refreshRateMultiCombo.addValueChangeListener(valueChangeEvent -> {
-              if(!Objects.isNull(valueChangeEvent.getValue())) {
+              if(!Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()) {
                 filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IN, "refreshRate", Set.of(valueChangeEvent.getValue())));
               } else {
                 filterCriteria.removeDataOperation(ProductQuery.of(null, "refreshRate", Collections.emptySet()));
@@ -191,7 +204,7 @@ public class ProductBuyAffiliationView extends Div {
             });
 
             screenSizeMultiCombo.addValueChangeListener(valueChangeEvent -> {
-              if(!Objects.isNull(valueChangeEvent.getValue())) {
+              if(!Objects.isNull(valueChangeEvent.getValue()) && !valueChangeEvent.getValue().isEmpty()) {
                 filterCriteria.addDataOperation(ProductQuery.of(ProductQuery.Operator.IN, "screenSize", Set.of(valueChangeEvent.getValue())));
               } else {
                 filterCriteria.removeDataOperation(ProductQuery.of(null, "screenSize", Collections.emptySet()));
@@ -203,7 +216,7 @@ public class ProductBuyAffiliationView extends Div {
             CompletableFuture<Set<String>> refreshRateFuture = _monitorService.getProjectedUniqueItems("refreshRate", filterExecutors);
             refreshRateFuture.thenAccept(refreshRateMultiCombo::setItems);
 
-            CompletableFuture<Set<String>> refreshBrand = _monitorService.getProjectedUniqueItems("brand", filterExecutors);
+            CompletableFuture<Set<String>> refreshBrand = _monitorService.getProjectedUniqueItems("brandName", filterExecutors);
             refreshBrand.thenAccept(brand::setItems);
 
             CompletableFuture<Set<String>> refreshConnectivityTech = _monitorService.getProjectedUniqueItems("connectivityTech", filterExecutors);
@@ -276,22 +289,12 @@ public class ProductBuyAffiliationView extends Div {
 
     private void refreshGrid() {
       Query<?, FilterCriteria> queryFilter = new Query<>(filterCriteria);
+
       List<Product> matchedProducts = (List<Product>) monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(),
-        queryFilter.getFilter().orElse(null)).join();
+        queryFilter.getFilter().orElse(null))
+        .join();
 
-      System.out.println(matchedProducts);
       grid.setItems(matchedProducts);
-
-/*      monitorService.findAllMonitors(queryFilter.getOffset(), queryFilter.getLimit(), queryFilter.getFilter().orElse(null))
-                    .thenAccept(itms -> {
-                      System.out.println(itms);
-                      grid.setItems((List<Product>) itms);
-                    })
-                    .exceptionally(e -> {
-                      System.out.println(e);
-                      grid.setItems(Collections.emptyList());
-                      return null;
-                    });*/
     }
 
     private ComponentRenderer<Anchor, Product> createAffiliateURLRenderer() {
